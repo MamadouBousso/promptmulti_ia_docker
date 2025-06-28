@@ -25,6 +25,15 @@ except Exception as e:
     claude_client = None
     CLAUDE_AVAILABLE = False
 
+try:
+    from src.infrastructure.groq_client import GroqClient
+    groq_client = GroqClient()
+    GROQ_AVAILABLE = True
+except Exception as e:
+    print(f"Groq non disponible: {e}")
+    groq_client = None
+    GROQ_AVAILABLE = False
+
 app = Flask(__name__)
 
 @app.route('/', methods=['GET', 'POST'])
@@ -108,6 +117,91 @@ def claude_api():
             "error": str(e)
         }), 500
 
+@app.route('/api/groq', methods=['POST'])
+def groq_api():
+    """API endpoint pour les appels Groq (Llama)."""
+    if not GROQ_AVAILABLE:
+        return jsonify({
+            "success": False,
+            "error": "Groq n'est pas configuré"
+        }), 400
+    
+    try:
+        data = request.get_json()
+        prompt = data.get('prompt', '')
+        model = data.get('model', 'llama3-8b-8192')
+        
+        if not prompt:
+            return jsonify({
+                "success": False,
+                "error": "Le prompt est requis"
+            }), 400
+        
+        # Générer la réponse avec Groq
+        groq_response = groq_client.generate_with_model_selection(prompt, model)
+        
+        return jsonify(groq_response)
+        
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "error": str(e)
+        }), 500
+
+@app.route('/api/groq/stream', methods=['POST'])
+def groq_stream_api():
+    """API endpoint pour les appels Groq en streaming."""
+    if not GROQ_AVAILABLE:
+        return jsonify({
+            "success": False,
+            "error": "Groq n'est pas configuré"
+        }), 400
+    
+    try:
+        data = request.get_json()
+        prompt = data.get('prompt', '')
+        model = data.get('model', 'llama3-8b-8192')
+        
+        if not prompt:
+            return jsonify({
+                "success": False,
+                "error": "Le prompt est requis"
+            }), 400
+        
+        def generate():
+            for chunk in groq_client.generate_streaming_response(prompt, model):
+                yield f"data: {json.dumps({'text': chunk, 'success': True})}\n\n"
+        
+        return Response(generate(), mimetype='text/event-stream')
+        
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "error": str(e)
+        }), 500
+
+@app.route('/api/groq/models', methods=['GET'])
+def groq_models_api():
+    """API endpoint pour récupérer les modèles disponibles sur Groq."""
+    if not GROQ_AVAILABLE:
+        return jsonify({
+            "success": False,
+            "error": "Groq n'est pas configuré"
+        }), 400
+    
+    try:
+        models = groq_client.get_available_models()
+        return jsonify({
+            "success": True,
+            "models": models
+        })
+        
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "error": str(e)
+        }), 500
+
 @app.route('/api/claude/stream', methods=['POST'])
 def claude_stream_api():
     """API endpoint pour les appels Claude en streaming."""
@@ -141,7 +235,7 @@ def claude_stream_api():
 
 @app.route('/api/compare', methods=['POST'])
 def compare_apis():
-    """API endpoint pour comparer les réponses d'OpenAI et Claude."""
+    """API endpoint pour comparer les réponses d'OpenAI, Claude et Groq."""
     try:
         data = request.get_json()
         prompt = data.get('prompt', '')
@@ -167,6 +261,13 @@ def compare_apis():
             responses['claude'] = claude_response
         else:
             responses['claude'] = {"success": False, "error": "Claude non configuré"}
+        
+        # Réponse Groq
+        if GROQ_AVAILABLE:
+            groq_response = groq_client.generate_voice_response(prompt)
+            responses['groq'] = groq_response
+        else:
+            responses['groq'] = {"success": False, "error": "Groq non configuré"}
         
         return jsonify({
             "success": True,
