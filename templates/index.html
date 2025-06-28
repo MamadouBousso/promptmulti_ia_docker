@@ -3,12 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Assistant Voix</title>
+    <title>Assistant Voix - Multi-IA</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100 min-h-screen flex items-center justify-center">
-    <div class="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
-        <h1 class="text-2xl font-bold text-center mb-6 text-slate-800">Assistant Voix</h1>
+    <div class="bg-white p-8 rounded-lg shadow-lg w-full max-w-2xl">
+        <h1 class="text-2xl font-bold text-center mb-6 text-slate-800">Assistant Voix - Multi-IA</h1>
+        
+        <!-- Sélecteur d'IA -->
+        <div class="mb-6">
+            <label class="block text-sm font-medium text-gray-700 mb-2">Choisir l'IA :</label>
+            <div class="flex space-x-4">
+                <label class="flex items-center">
+                    <input type="radio" name="aiProvider" value="openai" checked class="mr-2">
+                    <span>OpenAI (GPT-4o)</span>
+                </label>
+                <label class="flex items-center">
+                    <input type="radio" name="aiProvider" value="claude" class="mr-2">
+                    <span>Claude (Anthropic)</span>
+                </label>
+                <label class="flex items-center">
+                    <input type="radio" name="aiProvider" value="compare" class="mr-2">
+                    <span>Comparer les deux</span>
+                </label>
+            </div>
+        </div>
         
         <form id="queryForm" method="POST">
             <input
@@ -35,6 +54,20 @@
             </div>
         </div>
 
+        <!-- Zone de comparaison -->
+        <div id="compareArea" class="mt-4" style="display: none;">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="p-2 border border-blue-300 rounded bg-blue-50">
+                    <h3 class="font-bold text-blue-800 mb-2">OpenAI (GPT-4o)</h3>
+                    <div id="openaiResponse" class="text-sm"></div>
+                </div>
+                <div class="p-2 border border-green-300 rounded bg-green-50">
+                    <h3 class="font-bold text-green-800 mb-2">Claude (Anthropic)</h3>
+                    <div id="claudeResponse" class="text-sm"></div>
+                </div>
+            </div>
+        </div>
+
         <!-- Indicateur de chargement -->
         <div id="loadingIndicator" class="mt-4 text-center" style="display: none;">
             <div class="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-slate-800"></div>
@@ -57,11 +90,15 @@
             const submitBtn = document.getElementById('submitBtn');
             const responseArea = document.getElementById('responseArea');
             const responseText = document.getElementById('responseText');
+            const compareArea = document.getElementById('compareArea');
+            const openaiResponse = document.getElementById('openaiResponse');
+            const claudeResponse = document.getElementById('claudeResponse');
             const loadingIndicator = document.getElementById('loadingIndicator');
             const errorArea = document.getElementById('errorArea');
             const errorText = document.getElementById('errorText');
             
             const prompt = queryInput.value.trim();
+            const selectedProvider = document.querySelector('input[name="aiProvider"]:checked').value;
             
             if (!prompt) {
                 showError('Veuillez saisir une question.');
@@ -71,12 +108,27 @@
             // Afficher l'indicateur de chargement
             loadingIndicator.style.display = 'block';
             responseArea.style.display = 'none';
+            compareArea.style.display = 'none';
             errorArea.style.display = 'none';
             submitBtn.disabled = true;
             
             try {
-                // Appel à l'API OpenAI
-                const response = await fetch('/api/chat', {
+                let endpoint = '';
+                
+                switch(selectedProvider) {
+                    case 'openai':
+                        endpoint = '/api/chat';
+                        break;
+                    case 'claude':
+                        endpoint = '/api/claude';
+                        break;
+                    case 'compare':
+                        endpoint = '/api/compare';
+                        break;
+                }
+                
+                // Appel à l'API
+                const response = await fetch(endpoint, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -87,9 +139,18 @@
                 const data = await response.json();
                 
                 if (data.success) {
-                    // Afficher la réponse
-                    responseText.textContent = data.text;
-                    responseArea.style.display = 'block';
+                    if (selectedProvider === 'compare') {
+                        // Afficher les comparaisons
+                        openaiResponse.textContent = data.responses.openai.success ? 
+                            data.responses.openai.text : data.responses.openai.error;
+                        claudeResponse.textContent = data.responses.claude.success ? 
+                            data.responses.claude.text : data.responses.claude.error;
+                        compareArea.style.display = 'block';
+                    } else {
+                        // Afficher la réponse normale
+                        responseText.textContent = data.text;
+                        responseArea.style.display = 'block';
+                    }
                 } else {
                     // Afficher l'erreur
                     showError(data.error || 'Erreur lors de la génération de la réponse');
@@ -109,10 +170,12 @@
             const errorArea = document.getElementById('errorArea');
             const errorText = document.getElementById('errorText');
             const responseArea = document.getElementById('responseArea');
+            const compareArea = document.getElementById('compareArea');
             
             errorText.textContent = message;
             errorArea.style.display = 'block';
             responseArea.style.display = 'none';
+            compareArea.style.display = 'none';
         }
         
         document.getElementById('queryForm').addEventListener('submit', handleQuery);

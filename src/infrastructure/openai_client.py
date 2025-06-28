@@ -18,13 +18,13 @@ class OpenAIClient:
         openai.api_key = api_key
         self.client = openai.OpenAI(api_key=api_key)
     
-    def generate_response(self, prompt: str, model: str = "gpt-3.5-turbo") -> Optional[str]:
+    def generate_response(self, prompt: str, model: str = "gpt-4o") -> Optional[str]:
         """
         Génère une réponse à partir d'un prompt en utilisant l'API OpenAI.
         
         Args:
             prompt (str): Le prompt à envoyer à l'API
-            model (str): Le modèle à utiliser (défaut: gpt-3.5-turbo)
+            model (str): Le modèle à utiliser (défaut: gpt-4o)
             
         Returns:
             Optional[str]: La réponse générée ou None en cas d'erreur
