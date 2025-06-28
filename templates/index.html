@@ -14,40 +14,105 @@
             <input
                 type="text"
                 name="query"
+                id="queryInput"
                 placeholder="Parlez à l'assistant…"
                 class="border border-slate-800 w-full rounded p-2 mb-4"
                 required
             />
             <button 
                 type="submit" 
+                id="submitBtn"
                 class="w-full px-4 py-2 bg-slate-800 text-white rounded hover:bg-slate-700 transition-colors"
             >
                 Envoyer
             </button>
         </form>
 
-        {% if response %}
-        <div class="mt-4 p-2 border border-slate-300 rounded bg-slate-50">
-            {{ response }}
+        <!-- Zone de réponse -->
+        <div id="responseArea" class="mt-4" style="display: none;">
+            <div class="p-2 border border-slate-300 rounded bg-slate-50">
+                <div id="responseText"></div>
+            </div>
         </div>
-        {% endif %}
+
+        <!-- Indicateur de chargement -->
+        <div id="loadingIndicator" class="mt-4 text-center" style="display: none;">
+            <div class="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-slate-800"></div>
+            <p class="mt-2 text-slate-600">Génération de la réponse...</p>
+        </div>
+
+        <!-- Messages d'erreur -->
+        <div id="errorArea" class="mt-4 p-2 border border-red-300 rounded bg-red-50 text-red-700" style="display: none;">
+            <div id="errorText"></div>
+        </div>
     </div>
 
     <script>
         let response = '';
         
-        function handleQuery(event) {
+        async function handleQuery(event) {
             event.preventDefault();
-            response = "Merci pour votre question, nous aurons bientôt une réponse pour vous !";
             
-            // Créer ou mettre à jour l'élément de réponse
-            let responseDiv = document.querySelector('.response-div');
-            if (!responseDiv) {
-                responseDiv = document.createElement('div');
-                responseDiv.className = 'mt-4 p-2 border border-slate-300 rounded bg-slate-50 response-div';
-                document.querySelector('form').parentNode.appendChild(responseDiv);
+            const queryInput = document.getElementById('queryInput');
+            const submitBtn = document.getElementById('submitBtn');
+            const responseArea = document.getElementById('responseArea');
+            const responseText = document.getElementById('responseText');
+            const loadingIndicator = document.getElementById('loadingIndicator');
+            const errorArea = document.getElementById('errorArea');
+            const errorText = document.getElementById('errorText');
+            
+            const prompt = queryInput.value.trim();
+            
+            if (!prompt) {
+                showError('Veuillez saisir une question.');
+                return;
             }
-            responseDiv.textContent = response;
+            
+            // Afficher l'indicateur de chargement
+            loadingIndicator.style.display = 'block';
+            responseArea.style.display = 'none';
+            errorArea.style.display = 'none';
+            submitBtn.disabled = true;
+            
+            try {
+                // Appel à l'API OpenAI
+                const response = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ prompt: prompt })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    // Afficher la réponse
+                    responseText.textContent = data.text;
+                    responseArea.style.display = 'block';
+                } else {
+                    // Afficher l'erreur
+                    showError(data.error || 'Erreur lors de la génération de la réponse');
+                }
+                
+            } catch (error) {
+                showError('Erreur de connexion au serveur');
+                console.error('Erreur:', error);
+            } finally {
+                // Masquer l'indicateur de chargement
+                loadingIndicator.style.display = 'none';
+                submitBtn.disabled = false;
+            }
+        }
+        
+        function showError(message) {
+            const errorArea = document.getElementById('errorArea');
+            const errorText = document.getElementById('errorText');
+            const responseArea = document.getElementById('responseArea');
+            
+            errorText.textContent = message;
+            errorArea.style.display = 'block';
+            responseArea.style.display = 'none';
         }
         
         document.getElementById('queryForm').addEventListener('submit', handleQuery);
