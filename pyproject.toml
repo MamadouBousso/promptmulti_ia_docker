@@ -1,19 +1,61 @@
 [project]
 name = "promptingmulti_ia"
-version = "1.0.0"
-description = "Assistant vocal multi-IA avec support OpenAI, Claude et Groq"
+version = "2.0.0"
+description = "Assistant multi-IA intelligent avec support OpenAI (GPT-4o), Claude (Anthropic) et Groq (Llama) pour des réponses comparatives"
 authors = [
     {name = "Mamadou Bousso", email = "mamadou.bousso@example.com"}
 ]
+readme = "README.md"
+license = {text = "MIT"}
+keywords = ["ai", "openai", "claude", "groq", "llama", "flask", "assistant", "multi-ia"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Internet :: WWW/HTTP :: WSGI :: Application",
+]
 dependencies = [
-    "flask",
-    "openai",
-    "anthropic",
-    "groq",
-    "python-dotenv",
+    "flask>=3.0.0",
+    "openai>=1.0.0",
+    "anthropic>=0.25.0",
+    "groq>=0.4.0",
+    "python-dotenv>=1.0.0",
 ]
 requires-python = ">=3.12"
+
+[project.urls]
+Homepage = "https://github.com/MamadouBousso/promptingmulti_ia"
+Repository = "https://github.com/MamadouBousso/promptingmulti_ia"
+Issues = "https://github.com/MamadouBousso/promptingmulti_ia/issues"
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "pytest-cov>=4.0.0",
+    "black>=23.0.0",
+    "flake8>=6.0.0",
+    "mypy>=1.0.0",
+]
 
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
+
+[tool.black]
+line-length = 88
+target-version = ['py312']
+
+[tool.mypy]
+python_version = "3.12"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+
+[tool.pytest.ini_options]
+testpaths = ["test"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]

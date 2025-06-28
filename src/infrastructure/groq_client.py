@@ -47,7 +47,7 @@ class GroqClient:
             print(f"Erreur lors de l'appel à l'API Groq: {e}")
             return None
     
-    def generate_voice_response(self, prompt: str) -> Dict[str, Any]:
+    def generate_voice_response(self, prompt: str,model: str = "llama3-8b-8192") -> Dict[str, Any]:
         """
         Génère une réponse vocale à partir d'un prompt.
         
@@ -66,7 +66,7 @@ class GroqClient:
                     "success": True,
                     "text": text_response,
                     "prompt": prompt,
-                    "model": "llama3-8b-8192",
+                    "model": model,
                     "provider": "groq"
                 }
             else:
