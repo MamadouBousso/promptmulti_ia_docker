@@ -1,0 +1,1 @@
+# Package domaine - Entités et règles métier 
