@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Assistant Voix</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center">
+    <div class="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
+        <h1 class="text-2xl font-bold text-center mb-6 text-slate-800">Assistant Voix</h1>
+        
+        <form id="queryForm" method="POST">
+            <input
+                type="text"
+                name="query"
+                placeholder="Parlez à l'assistant…"
+                class="border border-slate-800 w-full rounded p-2 mb-4"
+                required
+            />
+            <button 
+                type="submit" 
+                class="w-full px-4 py-2 bg-slate-800 text-white rounded hover:bg-slate-700 transition-colors"
+            >
+                Envoyer
+            </button>
+        </form>
+
+        {% if response %}
+        <div class="mt-4 p-2 border border-slate-300 rounded bg-slate-50">
+            {{ response }}
+        </div>
+        {% endif %}
+    </div>
+
+    <script>
+        let response = '';
+        
+        function handleQuery(event) {
+            event.preventDefault();
+            response = "Merci pour votre question, nous aurons bientôt une réponse pour vous !";
+            
+            // Créer ou mettre à jour l'élément de réponse
+            let responseDiv = document.querySelector('.response-div');
+            if (!responseDiv) {
+                responseDiv = document.createElement('div');
+                responseDiv.className = 'mt-4 p-2 border border-slate-300 rounded bg-slate-50 response-div';
+                document.querySelector('form').parentNode.appendChild(responseDiv);
+            }
+            responseDiv.textContent = response;
+        }
+        
+        document.getElementById('queryForm').addEventListener('submit', handleQuery);
+    </script>
+</body>
+</html> 
