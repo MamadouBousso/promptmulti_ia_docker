@@ -1,7 +1,19 @@
 [project]
-name = "voixassistant1"
-version = "0.1.0"
-description = "Add your description here"
-readme = "README.md"
-requires-python = ">=3.11"
-dependencies = []
+name = "promptingmulti_ia"
+version = "1.0.0"
+description = "Assistant vocal multi-IA avec support OpenAI, Claude et Groq"
+authors = [
+    {name = "Mamadou Bousso", email = "mamadou.bousso@example.com"}
+]
+dependencies = [
+    "flask",
+    "openai",
+    "anthropic",
+    "groq",
+    "python-dotenv",
+]
+requires-python = ">=3.12"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"

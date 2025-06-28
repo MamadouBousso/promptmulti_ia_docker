@@ -1,10 +1,10 @@
-# VoixAssistant1
+# PromptingMulti_IA
 
 Un assistant vocal intelligent développé avec Flask et une interface web moderne utilisant Tailwind CSS, intégrant l'API OpenAI pour des réponses intelligentes.
 
 ## 📋 Description
 
-VoixAssistant1 est une application web qui permet aux utilisateurs d'interagir avec un assistant vocal via un formulaire textuel. L'application utilise l'API OpenAI pour générer des réponses intelligentes et contextuelles.
+PromptingMulti_IA est une application web qui permet aux utilisateurs d'interagir avec un assistant vocal via un formulaire textuel. L'application utilise l'API OpenAI pour générer des réponses intelligentes et contextuelles.
 
 ## 🚀 Fonctionnalités
 
@@ -21,7 +21,7 @@ VoixAssistant1 est une application web qui permet aux utilisateurs d'interagir a
 
 - **Backend** : Flask (Python)
 - **Frontend** : HTML5, JavaScript, Tailwind CSS
-- **IA** : OpenAI API (GPT-3.5-turbo)
+- **IA** : OpenAI API (GPT-4o)
 - **Gestion des Dépendances** : uv
 - **Variables d'Environnement** : python-dotenv
 - **Architecture** : Pattern MVC (Model-View-Controller)
@@ -29,7 +29,7 @@ VoixAssistant1 est une application web qui permet aux utilisateurs d'interagir a
 ## 📁 Structure du Projet
 
 ```
-VoixAssistant1/
+promptingmulti_ia/
 ├── src/
 │   ├── application/     # Couche application (logique métier)
 │   ├── domaine/         # Couche domaine (entités et règles métier)
@@ -58,7 +58,7 @@ VoixAssistant1/
 1. **Cloner le repository**
    ```bash
    git clone <url-du-repo>
-   cd VoixAssistant1
+   cd promptingmulti_ia
    ```
 
 2. **Initialiser l'environnement virtuel avec uv**
@@ -86,7 +86,7 @@ VoixAssistant1/
    ```
 
 6. **Accéder à l'application**
-   Ouvrez votre navigateur et allez à `http://localhost:5000`
+   Ouvrez votre navigateur et allez à `http://localhost:8000`
 
 ## 🔑 Configuration OpenAI
 
@@ -106,9 +106,16 @@ Créez un fichier `.env` à la racine du projet :
 # Configuration OpenAI
 OPENAI_API_KEY=sk-your-actual-api-key-here
 
+# Configuration Anthropic (Claude)
+ANTHROPIC_API_KEY=your_anthropic_api_key_here
+
+# Configuration Groq (Llama)
+GROQ_API_KEY=your_groq_api_key_here
+
 # Configuration Flask
 FLASK_ENV=development
 FLASK_DEBUG=True
+FLASK_PORT=8000
 ```
 
 ## 🎯 Utilisation
@@ -177,7 +184,7 @@ L'interface se compose de :
 ### Exemple d'utilisation de l'API
 
 ```bash
-curl -X POST http://localhost:5000/api/chat \
+curl -X POST http://localhost:8000/api/chat \
   -H "Content-Type: application/json" \
   -d '{"prompt": "Quel est le temps qu'il fait aujourd'hui ?"}'
 ```
@@ -188,14 +195,14 @@ curl -X POST http://localhost:5000/api/chat \
 
 L'application Flask est configurée avec :
 - Mode debug activé pour le développement
-- Port par défaut : 5000
+- Port par défaut : 8000 (configurable via FLASK_PORT)
 - Templates dans le dossier `templates/`
 - Gestion automatique des variables d'environnement
 
 ### Configuration OpenAI
 
 Le client OpenAI est configuré avec :
-- Modèle par défaut : gpt-3.5-turbo
+- Modèle par défaut : gpt-4o
 - Max tokens : 500
 - Temperature : 0.7
 - Messages système pour définir le comportement de l'assistant
@@ -251,7 +258,7 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install -r requirements.txt
 COPY . .
-EXPOSE 5000
+EXPOSE 8000
 CMD ["python", "app.py"]
 ```
 
