@@ -9,7 +9,10 @@ const CONFIG = {
         OPENAI: '/api/chat',
         CLAUDE: '/api/claude',
         GROQ: '/api/groq',
-        COMPARE: '/api/compare'
+        COMPARE: '/api/compare',
+        HISTORY: '/api/history',
+        STATS: '/api/stats',
+        SEARCH: '/api/history/search'
     },
     MARKDOWN_OPTIONS: {
         breaks: true,
@@ -24,6 +27,7 @@ class AssistantApp {
         this.response = '';
         this.initializeMarkdown();
         this.bindEvents();
+        this.loadStatistics();
     }
 
     /**
@@ -48,6 +52,295 @@ class AssistantApp {
         const form = document.getElementById('queryForm');
         if (form) {
             form.addEventListener('submit', (e) => this.handleQuery(e));
+        }
+
+        // Gestion de l'historique
+        this.bindHistoryEvents();
+    }
+
+    /**
+     * Lie les événements liés à l'historique
+     */
+    bindHistoryEvents() {
+        // Bouton de recherche
+        const searchBtn = document.getElementById('searchBtn');
+        if (searchBtn) {
+            searchBtn.addEventListener('click', () => this.searchHistory());
+        }
+
+        // Recherche avec Entrée
+        const searchInput = document.getElementById('searchInput');
+        if (searchInput) {
+            searchInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    this.searchHistory();
+                }
+            });
+        }
+
+        // Bouton d'actualisation
+        const refreshBtn = document.getElementById('refreshHistoryBtn');
+        if (refreshBtn) {
+            refreshBtn.addEventListener('click', () => this.refreshHistory());
+        }
+
+        // Gestion des clics sur les éléments de l'historique
+        document.addEventListener('click', (e) => {
+            if (e.target.classList.contains('view-btn')) {
+                e.stopPropagation();
+                const conversationId = e.target.closest('.conversation-item').dataset.id;
+                this.viewConversation(conversationId);
+            } else if (e.target.classList.contains('delete-btn')) {
+                e.stopPropagation();
+                const conversationId = e.target.closest('.conversation-item').dataset.id;
+                this.deleteConversation(conversationId);
+            }
+        });
+
+        // Fermeture du modal
+        const closeModal = document.getElementById('closeModal');
+        if (closeModal) {
+            closeModal.addEventListener('click', () => this.closeModal());
+        }
+
+        // Fermeture du modal en cliquant à l'extérieur
+        const modal = document.getElementById('conversationModal');
+        if (modal) {
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    this.closeModal();
+                }
+            });
+        }
+    }
+
+    /**
+     * Charge les statistiques
+     */
+    async loadStatistics() {
+        try {
+            const response = await fetch(CONFIG.ENDPOINTS.STATS);
+            const data = await response.json();
+            
+            if (data.success) {
+                this.updateStatistics(data.statistics);
+            }
+        } catch (error) {
+            console.error('Erreur lors du chargement des statistiques:', error);
+        }
+    }
+
+    /**
+     * Met à jour l'affichage des statistiques
+     */
+    updateStatistics(stats) {
+        const elements = {
+            'totalConversations': stats.total_conversations,
+            'successfulConversations': stats.successful_conversations,
+            'successRate': stats.success_rate.toFixed(1),
+            'todayConversations': stats.daily_stats[new Date().toISOString().split('T')[0]] || 0
+        };
+
+        Object.entries(elements).forEach(([id, value]) => {
+            const element = document.getElementById(id);
+            if (element) {
+                element.textContent = value;
+            }
+        });
+    }
+
+    /**
+     * Recherche dans l'historique
+     */
+    async searchHistory() {
+        const searchInput = document.getElementById('searchInput');
+        const searchTerm = searchInput ? searchInput.value.trim() : '';
+        
+        if (!searchTerm) {
+            this.refreshHistory();
+            return;
+        }
+
+        try {
+            const response = await fetch(`${CONFIG.ENDPOINTS.SEARCH}?q=${encodeURIComponent(searchTerm)}`);
+            const data = await response.json();
+            
+            if (data.success) {
+                this.updateHistoryList(data.results);
+            } else {
+                this.showError('Erreur lors de la recherche: ' + data.error);
+            }
+        } catch (error) {
+            console.error('Erreur lors de la recherche:', error);
+            this.showError('Erreur lors de la recherche');
+        }
+    }
+
+    /**
+     * Actualise l'historique
+     */
+    async refreshHistory() {
+        try {
+            const response = await fetch(CONFIG.ENDPOINTS.HISTORY);
+            const data = await response.json();
+            
+            if (data.success) {
+                this.updateHistoryList(data.history);
+                this.loadStatistics();
+            } else {
+                this.showError('Erreur lors du chargement de l\'historique: ' + data.error);
+            }
+        } catch (error) {
+            console.error('Erreur lors du chargement de l\'historique:', error);
+            this.showError('Erreur lors du chargement de l\'historique');
+        }
+    }
+
+    /**
+     * Met à jour la liste de l'historique
+     */
+    updateHistoryList(conversations) {
+        const historyList = document.getElementById('historyList');
+        if (!historyList) return;
+
+        if (conversations.length === 0) {
+            historyList.innerHTML = '<p class="text-gray-500 text-center py-4">Aucune conversation trouvée</p>';
+            return;
+        }
+
+        const html = conversations.map(conversation => `
+            <div class="conversation-item p-3 border border-gray-200 rounded hover:bg-gray-50 cursor-pointer" 
+                 data-id="${conversation.id}">
+                <div class="flex justify-between items-start">
+                    <div class="flex-1">
+                        <p class="text-sm font-medium text-gray-800 mb-1">
+                            ${conversation.prompt.length > 100 ? 
+                                conversation.prompt.substring(0, 100) + '...' : 
+                                conversation.prompt}
+                        </p>
+                        <div class="flex items-center gap-2 text-xs text-gray-500">
+                            <span>${conversation.timestamp}</span>
+                            ${conversation.model_used ? 
+                                `<span class="px-2 py-1 bg-blue-100 text-blue-800 rounded">${conversation.model_used}</span>` : 
+                                ''}
+                            ${conversation.providers ? 
+                                conversation.providers.map(provider => 
+                                    `<span class="px-2 py-1 bg-green-100 text-green-800 rounded">${provider}</span>`
+                                ).join('') : 
+                                ''}
+                        </div>
+                    </div>
+                    <div class="flex gap-1">
+                        <button class="view-btn px-2 py-1 bg-blue-600 text-white rounded text-xs hover:bg-blue-700">
+                            Voir
+                        </button>
+                        <button class="delete-btn px-2 py-1 bg-red-600 text-white rounded text-xs hover:bg-red-700">
+                            Supprimer
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+
+        historyList.innerHTML = html;
+    }
+
+    /**
+     * Affiche les détails d'une conversation
+     */
+    async viewConversation(conversationId) {
+        try {
+            const response = await fetch(`${CONFIG.ENDPOINTS.HISTORY}/${conversationId}`);
+            const data = await response.json();
+            
+            if (data.success) {
+                this.showConversationModal(data.conversation);
+            } else {
+                this.showError('Erreur lors du chargement des détails: ' + data.error);
+            }
+        } catch (error) {
+            console.error('Erreur lors du chargement des détails:', error);
+            this.showError('Erreur lors du chargement des détails');
+        }
+    }
+
+    /**
+     * Affiche le modal avec les détails de la conversation
+     */
+    showConversationModal(conversation) {
+        const modal = document.getElementById('conversationModal');
+        const modalContent = document.getElementById('modalContent');
+        
+        if (!modal || !modalContent) return;
+
+        const responsesHtml = conversation.responses.map(response => `
+            <div class="mb-4 p-3 border rounded ${response.success ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}">
+                <div class="flex justify-between items-center mb-2">
+                    <h4 class="font-semibold text-gray-800">${response.provider}</h4>
+                    <span class="text-xs px-2 py-1 rounded ${response.success ? 'bg-green-200 text-green-800' : 'bg-red-200 text-red-800'}">
+                        ${response.success ? 'Succès' : 'Erreur'}
+                    </span>
+                </div>
+                ${response.model ? `<p class="text-xs text-gray-600 mb-2">Modèle: ${response.model}</p>` : ''}
+                ${response.response_text ? 
+                    `<div class="prose prose-sm max-w-none">${this.renderMarkdown(response.response_text)}</div>` : 
+                    `<p class="text-red-600">${response.error_message}</p>`
+                }
+                ${response.response_time ? `<p class="text-xs text-gray-500 mt-2">Temps: ${response.response_time.toFixed(2)}s</p>` : ''}
+                ${response.tokens_used ? `<p class="text-xs text-gray-500">Tokens: ${response.tokens_used}</p>` : ''}
+            </div>
+        `).join('');
+
+        modalContent.innerHTML = `
+            <div class="mb-4">
+                <h4 class="font-semibold text-gray-800 mb-2">Prompt:</h4>
+                <p class="text-gray-700 p-3 bg-gray-50 rounded">${conversation.prompt}</p>
+            </div>
+            <div class="mb-4">
+                <p class="text-sm text-gray-600">Date: ${conversation.timestamp}</p>
+                ${conversation.model_used ? `<p class="text-sm text-gray-600">Modèle principal: ${conversation.model_used}</p>` : ''}
+            </div>
+            <div>
+                <h4 class="font-semibold text-gray-800 mb-2">Réponses:</h4>
+                ${responsesHtml}
+            </div>
+        `;
+
+        modal.classList.remove('hidden');
+    }
+
+    /**
+     * Ferme le modal
+     */
+    closeModal() {
+        const modal = document.getElementById('conversationModal');
+        if (modal) {
+            modal.classList.add('hidden');
+        }
+    }
+
+    /**
+     * Supprime une conversation
+     */
+    async deleteConversation(conversationId) {
+        if (!confirm('Êtes-vous sûr de vouloir supprimer cette conversation ?')) {
+            return;
+        }
+
+        try {
+            const response = await fetch(`${CONFIG.ENDPOINTS.HISTORY}/${conversationId}`, {
+                method: 'DELETE'
+            });
+            const data = await response.json();
+            
+            if (data.success) {
+                this.refreshHistory();
+            } else {
+                this.showError('Erreur lors de la suppression: ' + data.error);
+            }
+        } catch (error) {
+            console.error('Erreur lors de la suppression:', error);
+            this.showError('Erreur lors de la suppression');
         }
     }
 
@@ -204,7 +497,7 @@ class AssistantApp {
     }
 
     /**
-     * Effectue l'appel API
+     * Effectue un appel API
      */
     async makeApiCall(endpoint, requestBody) {
         const response = await fetch(endpoint, {
@@ -215,54 +508,50 @@ class AssistantApp {
             body: JSON.stringify(requestBody)
         });
         
-        if (!response.ok) {
-            throw new Error(`Erreur HTTP: ${response.status}`);
-        }
-        
         return await response.json();
     }
 
     /**
-     * Gère la soumission de la requête
+     * Gère la soumission d'une requête
      */
     async handleQuery(event) {
         event.preventDefault();
         
         const formData = this.getFormData();
-        
         if (!formData.prompt) {
             this.showError('Veuillez saisir une question.');
             return;
         }
         
-        // Préparer l'affichage
         this.hideAllDisplays();
         this.showLoading();
         
         try {
             const { endpoint, requestBody } = this.getRequestConfig(formData);
-            const data = await this.makeApiCall(endpoint, requestBody);
+            const result = await this.makeApiCall(endpoint, requestBody);
             
-            if (data.success) {
+            if (result.success) {
                 if (formData.provider === 'compare') {
-                    this.displayCompareResponses(data.responses);
+                    this.displayCompareResponses(result.responses);
                 } else {
-                    this.displaySingleResponse(data.text);
+                    this.displaySingleResponse(result.text);
                 }
+                
+                // Actualiser l'historique après une nouvelle conversation
+                setTimeout(() => this.refreshHistory(), 1000);
             } else {
-                this.showError(data.error || 'Erreur lors de la génération de la réponse');
+                this.showError(result.error || 'Une erreur est survenue.');
             }
-            
         } catch (error) {
-            this.showError('Erreur de connexion au serveur');
-            console.error('Erreur:', error);
+            console.error('Erreur lors de la requête:', error);
+            this.showError('Erreur de connexion. Veuillez réessayer.');
         } finally {
             this.hideLoading();
         }
     }
 }
 
-// Initialisation de l'application quand le DOM est chargé
+// Initialisation de l'application
 document.addEventListener('DOMContentLoaded', () => {
     new AssistantApp();
 });

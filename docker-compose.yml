@@ -16,6 +16,8 @@ services:
       # Montage des templates et static pour le développement
       - ./templates:/app/templates
       - ./static:/app/static
+      # Volume pour la base de données SQLite
+      - ./data:/app/data
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/"]

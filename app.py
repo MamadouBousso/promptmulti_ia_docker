@@ -2,9 +2,21 @@ from flask import Flask, render_template, request, jsonify, Response
 from dotenv import load_dotenv
 import os
 import json
+import time
+from datetime import datetime
 
 # Charger les variables d'environnement
 load_dotenv()
+
+# Import de la base de données
+try:
+    from src.infrastructure.database import DatabaseManager
+    db_manager = DatabaseManager()
+    DB_AVAILABLE = True
+except Exception as e:
+    print(f"Base de données non disponible: {e}")
+    db_manager = None
+    DB_AVAILABLE = False
 
 # Import des clients IA
 try:
@@ -39,23 +51,77 @@ app = Flask(__name__)
 @app.route('/', methods=['GET', 'POST'])
 def index():
     response = ''
+    conversation_id = None
+    
+    # Récupérer l'historique des conversations
+    history = []
+    if DB_AVAILABLE:
+        try:
+            history = db_manager.get_conversation_history(limit=10)
+        except Exception as e:
+            print(f"Erreur lors de la récupération de l'historique: {e}")
+    
     if request.method == 'POST':
         if OPENAI_AVAILABLE:
             # Utiliser OpenAI pour générer une réponse
             prompt = request.form.get('query', '')
             if prompt:
+                # Sauvegarder la conversation
+                if DB_AVAILABLE:
+                    try:
+                        conversation_id = db_manager.save_conversation(
+                            prompt=prompt,
+                            model_used="openai",
+                            response_success=True
+                        )
+                    except Exception as e:
+                        print(f"Erreur lors de la sauvegarde: {e}")
+                
+                # Mesurer le temps de réponse
+                start_time = time.time()
                 ai_response = openai_client.generate_voice_response(prompt)
+                response_time = time.time() - start_time
+                
                 if ai_response['success']:
                     response = ai_response['text']
+                    
+                    # Sauvegarder la réponse
+                    if DB_AVAILABLE and conversation_id:
+                        try:
+                            db_manager.save_response(
+                                conversation_id=conversation_id,
+                                provider="openai",
+                                model="gpt-4o",
+                                response_text=response,
+                                success=True,
+                                response_time=response_time
+                            )
+                        except Exception as e:
+                            print(f"Erreur lors de la sauvegarde de la réponse: {e}")
                 else:
                     response = f"Erreur: {ai_response['error']}"
+                    
+                    # Sauvegarder l'erreur
+                    if DB_AVAILABLE and conversation_id:
+                        try:
+                            db_manager.save_response(
+                                conversation_id=conversation_id,
+                                provider="openai",
+                                model="gpt-4o",
+                                response_text=None,
+                                success=False,
+                                error_message=ai_response['error'],
+                                response_time=response_time
+                            )
+                        except Exception as e:
+                            print(f"Erreur lors de la sauvegarde de l'erreur: {e}")
             else:
                 response = "Veuillez saisir une question."
         else:
             # Réponse statique si OpenAI n'est pas disponible
             response = "Merci pour votre question, nous aurons bientôt une réponse pour vous !"
     
-    return render_template('index.html', response=response)
+    return render_template('index.html', response=response, history=history)
 
 @app.route('/api/chat', methods=['POST'])
 def chat_api():
@@ -273,6 +339,170 @@ def compare_apis():
             "success": True,
             "prompt": prompt,
             "responses": responses
+        })
+        
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "error": str(e)
+        }), 500
+
+@app.route('/api/history', methods=['GET'])
+def get_history():
+    """API endpoint pour récupérer l'historique des conversations."""
+    if not DB_AVAILABLE:
+        return jsonify({
+            "success": False,
+            "error": "Base de données non disponible"
+        }), 500
+    
+    try:
+        limit = request.args.get('limit', 50, type=int)
+        offset = request.args.get('offset', 0, type=int)
+        
+        history = db_manager.get_conversation_history(limit=limit, offset=offset)
+        
+        return jsonify({
+            "success": True,
+            "history": history
+        })
+        
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "error": str(e)
+        }), 500
+
+@app.route('/api/history/<int:conversation_id>', methods=['GET'])
+def get_conversation_details(conversation_id):
+    """API endpoint pour récupérer les détails d'une conversation."""
+    if not DB_AVAILABLE:
+        return jsonify({
+            "success": False,
+            "error": "Base de données non disponible"
+        }), 500
+    
+    try:
+        conversation = db_manager.get_conversation_details(conversation_id)
+        
+        if not conversation:
+            return jsonify({
+                "success": False,
+                "error": "Conversation non trouvée"
+            }), 404
+        
+        return jsonify({
+            "success": True,
+            "conversation": conversation
+        })
+        
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "error": str(e)
+        }), 500
+
+@app.route('/api/history/search', methods=['GET'])
+def search_history():
+    """API endpoint pour rechercher dans l'historique."""
+    if not DB_AVAILABLE:
+        return jsonify({
+            "success": False,
+            "error": "Base de données non disponible"
+        }), 500
+    
+    try:
+        search_term = request.args.get('q', '')
+        limit = request.args.get('limit', 20, type=int)
+        
+        if not search_term:
+            return jsonify({
+                "success": False,
+                "error": "Terme de recherche requis"
+            }), 400
+        
+        results = db_manager.search_conversations(search_term, limit=limit)
+        
+        return jsonify({
+            "success": True,
+            "results": results
+        })
+        
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "error": str(e)
+        }), 500
+
+@app.route('/api/history/<int:conversation_id>', methods=['DELETE'])
+def delete_conversation(conversation_id):
+    """API endpoint pour supprimer une conversation."""
+    if not DB_AVAILABLE:
+        return jsonify({
+            "success": False,
+            "error": "Base de données non disponible"
+        }), 500
+    
+    try:
+        success = db_manager.delete_conversation(conversation_id)
+        
+        if not success:
+            return jsonify({
+                "success": False,
+                "error": "Conversation non trouvée"
+            }), 404
+        
+        return jsonify({
+            "success": True,
+            "message": "Conversation supprimée avec succès"
+        })
+        
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "error": str(e)
+        }), 500
+
+@app.route('/api/stats', methods=['GET'])
+def get_statistics():
+    """API endpoint pour récupérer les statistiques."""
+    if not DB_AVAILABLE:
+        return jsonify({
+            "success": False,
+            "error": "Base de données non disponible"
+        }), 500
+    
+    try:
+        stats = db_manager.get_statistics()
+        
+        return jsonify({
+            "success": True,
+            "statistics": stats
+        })
+        
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "error": str(e)
+        }), 500
+
+@app.route('/api/cleanup', methods=['POST'])
+def cleanup_old_conversations():
+    """API endpoint pour nettoyer les anciennes conversations."""
+    if not DB_AVAILABLE:
+        return jsonify({
+            "success": False,
+            "error": "Base de données non disponible"
+        }), 500
+    
+    try:
+        days = request.json.get('days', 30)
+        deleted_count = db_manager.cleanup_old_conversations(days=days)
+        
+        return jsonify({
+            "success": True,
+            "deleted_count": deleted_count,
+            "message": f"{deleted_count} conversations supprimées"
         })
         
     except Exception as e:
