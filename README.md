@@ -1,513 +1,256 @@
 # PromptMulti_IA Docker
 
-Un assistant multi-IA intelligent développé avec Flask et une interface web moderne utilisant Tailwind CSS, intégrant les APIs OpenAI (GPT-4o), Claude (Anthropic) et Groq (Llama) pour des réponses intelligentes et comparatives. **Version Dockerisée pour un déploiement facile.**
+Un assistant multi-IA intelligent développé avec Flask et une interface web moderne utilisant Tailwind CSS, intégrant les APIs OpenAI (GPT-4o), Claude (Anthropic) et Groq (Llama) pour des réponses intelligentes et comparatives. **Version Dockerisée avec historique des conversations.**
 
 ## 📋 Description
 
-PromptMulti_IA Docker est une application web qui permet aux utilisateurs d'interagir avec plusieurs assistants IA via un formulaire textuel. L'application supporte trois fournisseurs d'IA majeurs et permet de comparer leurs réponses en temps réel. **L'application est entièrement containerisée avec Docker pour un déploiement simplifié.**
+PromptMulti_IA Docker est une application web complète qui permet aux utilisateurs d'interagir avec plusieurs assistants IA via un formulaire textuel. L'application supporte trois fournisseurs d'IA majeurs et permet de comparer leurs réponses en temps réel. **L'application est entièrement containerisée avec Docker et inclut un système d'historique des conversations persistant.**
 
 ## 🚀 Fonctionnalités
 
-- **Interface Web Moderne** : Interface utilisateur responsive avec Tailwind CSS
-- **Multi-IA Support** : Intégration OpenAI (GPT-4o), Claude (Anthropic) et Groq (Llama)
-- **Comparaison en Temps Réel** : Compare les réponses des trois modèles simultanément
-- **Rendu Markdown** : Affichage riche avec support complet du formatage markdown
-- **Sélection de Modèles** : Choix spécifique des modèles Llama pour Groq
-- **Formulaire Interactif** : Zone de saisie pour les prompts textuels
-- **API REST Complète** : Endpoints pour chaque fournisseur d'IA
-- **Gestion des Erreurs** : Interface utilisateur avec gestion des erreurs robuste
-- **Indicateur de Chargement** : Feedback visuel pendant la génération
-- **Architecture Modulaire** : Structure organisée avec séparation des responsabilités
-- **Docker Ready** : Containerisation complète avec Docker et Docker Compose
-- **Gestion des Dépendances** : Utilisation de uv pour une installation rapide
+### 🤖 **Multi-IA Support**
+- **OpenAI (GPT-4o)** : Intégration complète avec l'API OpenAI
+- **Claude (Anthropic)** : Support de Claude 3.5 Sonnet
+- **Groq (Llama)** : Support de multiples modèles Llama (3.1 8B, 70B, 4 Scout)
+- **Mode Comparaison** : Comparaison simultanée des réponses des trois fournisseurs
 
-## 🛠️ Technologies Utilisées
+### 💾 **Système d'Historique**
+- **Base de données SQLite** : Stockage persistant des conversations
+- **Recherche avancée** : Recherche par mot-clé dans l'historique
+- **Statistiques en temps réel** : Métriques d'utilisation et de performance
+- **Gestion des conversations** : Visualisation, suppression, détails complets
+- **Métadonnées enrichies** : Temps de réponse, tokens utilisés, modèles
 
-- **Backend** : Flask (Python)
-- **Frontend** : HTML5, JavaScript, Tailwind CSS
-- **IA** : 
-  - OpenAI API (GPT-4o)
-  - Anthropic API (Claude 3.5 Sonnet)
-  - Groq API (Llama 3.1, Llama 4 Scout)
-- **Markdown** : marked.js pour le rendu
-- **Gestion des Dépendances** : uv
-- **Variables d'Environnement** : python-dotenv
-- **Architecture** : Pattern MVC (Model-View-Controller)
-- **Containerisation** : Docker, Docker Compose
+### 🎨 **Interface Utilisateur**
+- **Design moderne** : Interface responsive avec Tailwind CSS
+- **Rendu Markdown** : Support complet du formatage Markdown
+- **Mode sombre/clair** : Interface adaptative
+- **Indicateurs de chargement** : Feedback visuel en temps réel
+- **Gestion d'erreurs** : Messages d'erreur clairs et informatifs
 
-## 📁 Structure du Projet
+### 🐳 **Containerisation Docker**
+- **Déploiement simplifié** : Une seule commande pour lancer l'application
+- **Volumes persistants** : Base de données et fichiers de configuration
+- **Variables d'environnement** : Configuration sécurisée des clés API
+- **Docker Compose** : Orchestration complète avec health checks
 
-```
-promptmulti_ia_docker/
-├── src/
-│   ├── application/     # Couche application (logique métier)
-│   ├── domaine/         # Couche domaine (entités et règles métier)
-│   └── infrastructure/  # Couche infrastructure (base de données, API externes)
-│       ├── openai_client.py   # Client pour l'API OpenAI
-│       ├── claude_client.py   # Client pour l'API Claude
-│       └── groq_client.py     # Client pour l'API Groq
-├── templates/           # Templates HTML Flask
-│   └── index.html       # Page principale de l'application
-├── static/              # Fichiers statiques (CSS, JS, images)
-├── test/               # Tests unitaires et d'intégration
-├── app.py              # Point d'entrée de l'application Flask
-├── Dockerfile          # Configuration Docker
-├── docker-compose.yml  # Orchestration Docker Compose
-├── docker-build.sh     # Script de déploiement Docker
-├── .dockerignore       # Fichiers exclus du build Docker
-├── env.example         # Exemple de variables d'environnement
-├── pyproject.toml      # Configuration du projet et dépendances
-├── DOCKER.md           # Documentation Docker
-└── README.md           # Documentation du projet
-```
-
-## 🐳 Déploiement avec Docker (Recommandé)
+## 🛠️ Installation et Configuration
 
 ### Prérequis
+- Docker et Docker Compose installés
+- Clés API pour au moins un fournisseur IA (OpenAI, Claude, ou Groq)
 
-- Docker installé sur votre machine
-- Variables d'environnement configurées (optionnel)
-
-### Déploiement Rapide
-
-#### Option 1: Script automatique
-
+### 1. Cloner le dépôt
 ```bash
-# Cloner le repository
 git clone https://github.com/MamadouBousso/promptmulti_ia_docker.git
 cd promptmulti_ia_docker
-
-# Rendre le script exécutable
-chmod +x docker-build.sh
-
-# Lancer le script
-./docker-build.sh
 ```
 
-#### Option 2: Docker Compose (recommandé)
-
+### 2. Configurer les clés API
 ```bash
-# Cloner le repository
-git clone https://github.com/MamadouBousso/promptmulti_ia_docker.git
-cd promptmulti_ia_docker
+# Copier le fichier d'exemple
+cp env.example .env
 
-# Construire et lancer avec docker-compose
+# Éditer le fichier .env avec vos clés API
+nano .env
+```
+
+**Clés API requises :**
+- `OPENAI_API_KEY` : Obtenez sur [OpenAI Platform](https://platform.openai.com/api-keys)
+- `ANTHROPIC_API_KEY` : Obtenez sur [Anthropic Console](https://console.anthropic.com/)
+- `GROQ_API_KEY` : Obtenez sur [Groq Console](https://console.groq.com/)
+
+### 3. Lancer l'application
+
+#### Option A : Docker Compose (Recommandé)
+```bash
 docker-compose up -d
-
-# Voir les logs
-docker-compose logs -f
-
-# Arrêter
-docker-compose down
 ```
 
-#### Option 3: Docker manuel
-
+#### Option B : Docker manuel
 ```bash
-# Cloner le repository
-git clone https://github.com/MamadouBousso/promptmulti_ia_docker.git
-cd promptmulti_ia_docker
-
 # Construire l'image
 docker build -t promptmulti_ia_docker .
 
 # Lancer le conteneur
 docker run -d \
   --name promptmulti_ia_docker-container \
-  -p 8000:8000 \
-  -e OPENAI_API_KEY="votre_clé_openai" \
-  -e ANTHROPIC_API_KEY="votre_clé_claude" \
-  -e GROQ_API_KEY="votre_clé_groq" \
+  -p 9000:8000 \
+  -v $(pwd)/data:/app/data \
+  --env-file .env \
   promptmulti_ia_docker
 ```
 
-### Configuration des variables d'environnement
-
-#### Option 1: Fichier .env
-
-Créez un fichier `.env` à la racine du projet :
-
-```env
-OPENAI_API_KEY=votre_clé_openai_ici
-ANTHROPIC_API_KEY=votre_clé_claude_ici
-GROQ_API_KEY=votre_clé_groq_ici
+#### Option C : Script automatisé
+```bash
+chmod +x docker-build.sh
+./docker-build.sh
 ```
 
-Puis lancez avec :
+### 4. Accéder à l'application
+Ouvrez votre navigateur et allez sur : **http://localhost:9000**
+
+## 📊 Utilisation
+
+### Interface Principale
+1. **Choisissez un fournisseur IA** : OpenAI, Claude, Groq, ou "Comparer tous"
+2. **Saisissez votre question** dans le champ de texte
+3. **Cliquez sur "Envoyer"** pour obtenir une réponse
+4. **Consultez l'historique** en bas de page
+
+### Fonctionnalités Avancées
+- **Recherche** : Utilisez la barre de recherche pour trouver des conversations
+- **Statistiques** : Consultez les métriques d'utilisation en temps réel
+- **Détails** : Cliquez sur "Voir" pour afficher les détails d'une conversation
+- **Suppression** : Supprimez les conversations inutiles
+
+### API REST
+L'application expose plusieurs endpoints API :
 
 ```bash
-docker-compose --env-file .env up -d
+# Historique des conversations
+GET /api/history
+
+# Détails d'une conversation
+GET /api/history/{id}
+
+# Recherche dans l'historique
+GET /api/history/search?q={term}
+
+# Statistiques
+GET /api/stats
+
+# Supprimer une conversation
+DELETE /api/history/{id}
+
+# Nettoyer l'historique ancien
+POST /api/cleanup
 ```
 
-#### Option 2: Variables d'environnement système
+## 🏗️ Architecture
 
-```bash
-export OPENAI_API_KEY="votre_clé_openai"
-export ANTHROPIC_API_KEY="votre_clé_claude"
-export GROQ_API_KEY="votre_clé_groq"
+```
+promptmulti_ia_docker/
+├── app.py                 # Application Flask principale
+├── Dockerfile            # Configuration Docker
+├── docker-compose.yml    # Orchestration Docker
+├── .env                  # Variables d'environnement
+├── src/
+│   └── infrastructure/
+│       ├── database.py   # Gestionnaire de base de données SQLite
+│       ├── openai_client.py
+│       ├── claude_client.py
+│       └── groq_client.py
+├── templates/
+│   └── index.html        # Interface utilisateur
+├── static/
+│   ├── css/
+│   │   └── styles.css
+│   └── js/
+│       └── app.js        # Logique frontend
+└── data/                 # Base de données SQLite (volume Docker)
 ```
 
-### Accès à l'application
-
-Une fois le conteneur lancé, l'application est accessible sur :
-- **URL locale** : http://localhost:8000 (ou le port configuré)
-- **URL réseau** : http://votre_ip:8000
-
-## 🚀 Installation Locale (Sans Docker)
-
-### Prérequis
-
-- Python 3.12+
-- uv (gestionnaire de paquets Python)
-- Clés API pour au moins un des fournisseurs d'IA
-
-### Installation
-
-1. **Cloner le repository**
-   ```bash
-   git clone https://github.com/MamadouBousso/promptmulti_ia_docker.git
-   cd promptmulti_ia_docker
-   ```
-
-2. **Initialiser l'environnement virtuel avec uv**
-   ```bash
-   uv venv .venv
-   source .venv/bin/activate  # Sur macOS/Linux
-   # ou
-   .venv\Scripts\activate     # Sur Windows
-   ```
-
-3. **Installer les dépendances**
-   ```bash
-   uv pip install flask openai anthropic groq python-dotenv
-   ```
-
-4. **Configurer les variables d'environnement**
-   ```bash
-   # Copier le fichier d'exemple
-   cp env.example .env
-   
-   # Éditer le fichier .env et ajouter vos clés API
-   # Voir la section Configuration des APIs ci-dessous
-   ```
-
-5. **Lancer l'application**
-   ```bash
-   python app.py
-   ```
-
-6. **Accéder à l'application**
-   Ouvrez votre navigateur et allez à `http://localhost:8000`
-
-## 🔑 Configuration des APIs
-
-### Obtenir les clés API
-
-#### OpenAI (GPT-4o)
-1. Allez sur [OpenAI Platform](https://platform.openai.com/)
-2. Créez un compte ou connectez-vous
-3. Allez dans la section "API Keys"
-4. Créez une nouvelle clé API
-5. Copiez la clé et ajoutez-la dans votre fichier `.env`
-
-#### Claude (Anthropic)
-1. Allez sur [Anthropic Console](https://console.anthropic.com/)
-2. Créez un compte ou connectez-vous
-3. Allez dans la section "API Keys"
-4. Créez une nouvelle clé API
-5. Copiez la clé et ajoutez-la dans votre fichier `.env`
-
-#### Groq (Llama)
-1. Allez sur [Groq Console](https://console.groq.com/)
-2. Créez un compte ou connectez-vous
-3. Allez dans la section "API Keys"
-4. Créez une nouvelle clé API
-5. Copiez la clé et ajoutez-la dans votre fichier `.env`
+## 🔧 Configuration Avancée
 
 ### Variables d'Environnement
-
-Créez un fichier `.env` à la racine du projet :
-
-```env
-# Configuration OpenAI (GPT-4o)
-OPENAI_API_KEY=sk-your-actual-openai-api-key-here
-
-# Configuration Anthropic (Claude)
-ANTHROPIC_API_KEY=sk-ant-your-actual-anthropic-api-key-here
-
-# Configuration Groq (Llama)
-GROQ_API_KEY=gsk-your-actual-groq-api-key-here
-
+```bash
 # Configuration Flask
-FLASK_ENV=development
-FLASK_DEBUG=True
+FLASK_ENV=production
 FLASK_PORT=8000
+
+# Modèles par défaut
+OPENAI_MODEL="gpt-4o"
+CLAUDE_MODEL="claude-3-5-sonnet-20241022"
+GROQ_MODEL="llama3-8b-8192"
+
+# Paramètres de génération
+MAX_TOKENS=500
+TEMPERATURE=0.7
 ```
 
-**Note** : Vous n'avez besoin que d'une seule clé API pour commencer. L'application fonctionnera avec les fournisseurs configurés.
+### Base de Données
+L'application utilise SQLite pour stocker :
+- **Conversations** : prompts, timestamps, modèles utilisés
+- **Réponses** : textes, métadonnées, temps de réponse, tokens
+- **Statistiques** : métriques d'utilisation et de performance
 
-## 🎯 Utilisation
+### Sécurité
+- Les clés API sont stockées dans des variables d'environnement
+- Le fichier `.env` est exclu du dépôt Git
+- Validation des entrées utilisateur
+- Gestion sécurisée des erreurs
 
-### Interface Utilisateur
+## 📈 Statistiques et Monitoring
 
-L'interface se compose de :
+L'application fournit des statistiques détaillées :
+- **Total des conversations**
+- **Taux de succès**
+- **Conversations par jour**
+- **Performance par fournisseur**
+- **Utilisation des tokens**
 
-1. **Sélecteur d'IA** : Choisissez entre OpenAI, Claude, Groq ou comparer tous
-2. **Sélecteur de Modèle Groq** : Choisissez le modèle Llama spécifique (visible uniquement pour Groq)
-3. **Zone de saisie** : Champ de texte pour entrer vos questions/prompts
-4. **Bouton d'envoi** : Pour soumettre votre requête
-5. **Zone de réponse** : Affichage de la réponse avec formatage markdown
-6. **Zone de comparaison** : Affichage côte à côte des réponses des trois modèles
-7. **Indicateur de chargement** : Animation pendant la génération
-8. **Zone d'erreur** : Affichage des messages d'erreur
+## 🐛 Dépannage
 
-### Fonctionnement
+### Problèmes Courants
 
-1. **Sélection du fournisseur** : Choisissez OpenAI, Claude, Groq ou "Comparer tous"
-2. **Sélection du modèle** : Si vous choisissez Groq, sélectionnez le modèle Llama
-3. **Saisie du prompt** : Entrez votre question dans le champ de texte
-4. **Envoi** : Cliquez sur "Envoyer" ou appuyez sur Entrée
-5. **Affichage** : La réponse s'affiche avec un formatage markdown complet
-
-### Modèles Disponibles
-
-#### Groq (Llama)
-- **Llama 3.1 8B** : Modèle rapide et efficace
-- **Llama 3.1 70B** : Modèle plus puissant
-- **Llama 4 Scout 13B** : Modèle équilibré
-- **Llama 4 Scout 17B** : Modèle performant
-- **Llama 4 Scout 32B** : Modèle haute performance
-- **Llama 4 Scout 65B** : Modèle ultra-performant
-
-## 📝 API Documentation
-
-### Routes Disponibles
-
-#### GET `/`
-- **Description** : Page principale avec l'interface utilisateur
-- **Méthodes** : GET
-- **Réponse** : Page HTML avec formulaire et interface
-
-#### POST `/api/chat`
-- **Description** : API endpoint pour les appels OpenAI
-- **Méthodes** : POST
-- **Content-Type** : application/json
-- **Paramètres** :
-  ```json
-  {
-    "prompt": "Votre question ici"
-  }
-  ```
-- **Réponse** :
-  ```json
-  {
-    "success": true,
-    "text": "Réponse générée par OpenAI",
-    "model": "gpt-4o"
-  }
-  ```
-
-#### POST `/api/claude`
-- **Description** : API endpoint pour les appels Claude
-- **Méthodes** : POST
-- **Content-Type** : application/json
-- **Paramètres** :
-  ```json
-  {
-    "prompt": "Votre question ici"
-  }
-  ```
-- **Réponse** :
-  ```json
-  {
-    "success": true,
-    "text": "Réponse générée par Claude",
-    "model": "claude-3-5-sonnet-20241022"
-  }
-  ```
-
-#### POST `/api/groq`
-- **Description** : API endpoint pour les appels Groq
-- **Méthodes** : POST
-- **Content-Type** : application/json
-- **Paramètres** :
-  ```json
-  {
-    "prompt": "Votre question ici",
-    "model": "llama3-8b-8192"
-  }
-  ```
-- **Réponse** :
-  ```json
-  {
-    "success": true,
-    "text": "Réponse générée par Groq",
-    "model": "llama3-8b-8192"
-  }
-  ```
-
-#### POST `/api/compare`
-- **Description** : API endpoint pour comparer les trois modèles
-- **Méthodes** : POST
-- **Content-Type** : application/json
-- **Paramètres** :
-  ```json
-  {
-    "prompt": "Votre question ici"
-  }
-  ```
-- **Réponse** :
-  ```json
-  {
-    "success": true,
-    "prompt": "Votre question ici",
-    "responses": {
-      "openai": {
-        "success": true,
-        "text": "Réponse OpenAI",
-        "model": "gpt-4o"
-      },
-      "claude": {
-        "success": true,
-        "text": "Réponse Claude",
-        "model": "claude-3-5-sonnet-20241022"
-      },
-      "groq": {
-        "success": true,
-        "text": "Réponse Groq",
-        "model": "llama3-8b-8192"
-      }
-    }
-  }
-  ```
-
-## 📋 Commandes Docker Utiles
-
-### Gestion des conteneurs
-
+**1. Clients IA non disponibles**
 ```bash
-# Voir les conteneurs en cours
-docker ps
-
-# Voir les logs
-docker logs promptmulti_ia_docker-container
-
-# Arrêter le conteneur
-docker stop promptmulti_ia_docker-container
-
-# Redémarrer le conteneur
-docker restart promptmulti_ia_docker-container
-
-# Supprimer le conteneur
-docker rm promptmulti_ia_docker-container
-
-# Supprimer l'image
-docker rmi promptmulti_ia_docker
+# Vérifiez que les clés API sont configurées
+cat .env | grep API_KEY
 ```
 
-### Avec Docker Compose
-
+**2. Port déjà utilisé**
 ```bash
-# Voir les services
-docker-compose ps
-
-# Voir les logs
-docker-compose logs -f app
-
-# Redémarrer le service
-docker-compose restart app
-
-# Arrêter et supprimer
-docker-compose down
-
-# Reconstruire l'image
-docker-compose build --no-cache
-```
-
-## 🔍 Dépannage
-
-### Problèmes Docker
-
-#### Problème de port déjà utilisé
-Si le port 8000 est déjà utilisé, changez-le dans `docker-compose.yml` :
-```yaml
+# Changez le port dans docker-compose.yml
 ports:
-  - "8080:8000"  # Port externe:Port interne
+  - "9001:8000"  # Au lieu de 9000:8000
 ```
 
-#### Problème de permissions
+**3. Base de données corrompue**
 ```bash
-# Donner les bonnes permissions au script
-chmod +x docker-build.sh
+# Supprimez et recréez le volume
+docker-compose down
+rm -rf data/
+docker-compose up -d
 ```
 
-#### Reconstruire l'image
+**4. Problèmes de permissions**
 ```bash
-# Supprimer l'ancienne image
-docker rmi promptmulti_ia_docker
-
-# Reconstruire
-docker build -t promptmulti_ia_docker .
+# Donnez les bonnes permissions au dossier data
+chmod 755 data/
 ```
-
-#### Vérifier les logs
-```bash
-# Logs en temps réel
-docker logs -f promptmulti_ia_docker-container
-
-# Derniers logs
-docker logs --tail 50 promptmulti_ia_docker-container
-```
-
-### Problèmes Généraux
-
-#### Erreur "API non disponible"
-- Vérifiez que vos clés API sont correctement configurées
-- Assurez-vous que les variables d'environnement sont définies
-- Vérifiez la validité de vos clés API
-
-#### Erreur de connexion
-- Vérifiez que l'application est bien lancée
-- Vérifiez le port utilisé (8000 par défaut)
-- Vérifiez les logs pour plus de détails
 
 ## 🤝 Contribution
 
-Les contributions sont les bienvenues ! Voici comment contribuer :
+Les contributions sont les bienvenues ! Pour contribuer :
 
-1. **Fork** le projet
-2. **Créez** une branche pour votre fonctionnalité (`git checkout -b feature/AmazingFeature`)
-3. **Commitez** vos changements (`git commit -m 'Add some AmazingFeature'`)
-4. **Poussez** vers la branche (`git push origin feature/AmazingFeature`)
-5. **Ouvrez** une Pull Request
+1. Fork le projet
+2. Créez une branche pour votre fonctionnalité
+3. Committez vos changements
+4. Poussez vers la branche
+5. Ouvrez une Pull Request
 
 ## 📄 Licence
 
 Ce projet est sous licence MIT. Voir le fichier `LICENSE` pour plus de détails.
 
-## 👨‍💻 Auteur
-
-**Mamadou Bousso**
-- GitHub: [@MamadouBousso](https://github.com/MamadouBousso)
-- Email: mamadou.bousso@example.com
-
 ## 🙏 Remerciements
 
-- [OpenAI](https://openai.com/) pour l'API GPT-4o
-- [Anthropic](https://www.anthropic.com/) pour l'API Claude
-- [Groq](https://groq.com/) pour l'API Llama
-- [Flask](https://flask.palletsprojects.com/) pour le framework web
-- [Tailwind CSS](https://tailwindcss.com/) pour le styling
-- [uv](https://github.com/astral-sh/uv) pour la gestion des dépendances Python
+- **OpenAI** pour GPT-4o
+- **Anthropic** pour Claude
+- **Groq** pour l'accès aux modèles Llama
+- **Flask** pour le framework web
+- **Tailwind CSS** pour le design
+- **SQLite** pour la base de données
 
 ## 📞 Support
 
-Si vous rencontrez des problèmes ou avez des questions :
-
-1. Consultez la section [Dépannage](#dépannage)
-2. Vérifiez les [Issues](https://github.com/MamadouBousso/promptmulti_ia_docker/issues) existantes
-3. Créez une nouvelle [Issue](https://github.com/MamadouBousso/promptmulti_ia_docker/issues/new) si nécessaire
+Pour toute question ou problème :
+- Ouvrez une issue sur GitHub
+- Consultez la documentation dans le code
+- Vérifiez les logs Docker : `docker logs promptmulti_ia_docker-container`
 
 ---
 
-**⭐ N'oubliez pas de donner une étoile au projet si vous l'aimez !**
+**🎯 Application prête pour la production avec toutes les fonctionnalités avancées !**
