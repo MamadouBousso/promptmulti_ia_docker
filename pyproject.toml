@@ -1,13 +1,13 @@
 [project]
-name = "promptingmulti_ia"
+name = "promptmulti_ia_docker"
 version = "2.0.0"
-description = "Assistant multi-IA intelligent avec support OpenAI (GPT-4o), Claude (Anthropic) et Groq (Llama) pour des réponses comparatives"
+description = "Assistant multi-IA intelligent avec support OpenAI (GPT-4o), Claude (Anthropic) et Groq (Llama) pour des réponses comparatives - Version Docker"
 authors = [
     {name = "Mamadou Bousso", email = "mamadou.bousso@example.com"}
 ]
 readme = "README.md"
 license = {text = "MIT"}
-keywords = ["ai", "openai", "claude", "groq", "llama", "flask", "assistant", "multi-ia"]
+keywords = ["ai", "openai", "claude", "groq", "llama", "flask", "assistant", "multi-ia", "docker"]
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
@@ -27,9 +27,9 @@ dependencies = [
 requires-python = ">=3.12"
 
 [project.urls]
-Homepage = "https://github.com/MamadouBousso/promptingmulti_ia"
-Repository = "https://github.com/MamadouBousso/promptingmulti_ia"
-Issues = "https://github.com/MamadouBousso/promptingmulti_ia/issues"
+Homepage = "https://github.com/MamadouBousso/promptmulti_ia_docker"
+Repository = "https://github.com/MamadouBousso/promptmulti_ia_docker"
+Issues = "https://github.com/MamadouBousso/promptmulti_ia_docker/issues"
 
 [project.optional-dependencies]
 dev = [

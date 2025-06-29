@@ -283,4 +283,4 @@ def compare_apis():
 
 if __name__ == '__main__':
     port = int(os.getenv('FLASK_PORT', 8000))
-    app.run(debug=True, port=port) 
+    app.run(debug=False, host='0.0.0.0', port=port) 

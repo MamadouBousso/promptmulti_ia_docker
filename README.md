@@ -1,10 +1,10 @@
-# PromptingMulti_IA
+# PromptMulti_IA Docker
 
-Un assistant multi-IA intelligent développé avec Flask et une interface web moderne utilisant Tailwind CSS, intégrant les APIs OpenAI (GPT-4o), Claude (Anthropic) et Groq (Llama) pour des réponses intelligentes et comparatives.
+Un assistant multi-IA intelligent développé avec Flask et une interface web moderne utilisant Tailwind CSS, intégrant les APIs OpenAI (GPT-4o), Claude (Anthropic) et Groq (Llama) pour des réponses intelligentes et comparatives. **Version Dockerisée pour un déploiement facile.**
 
 ## 📋 Description
 
-PromptingMulti_IA est une application web qui permet aux utilisateurs d'interagir avec plusieurs assistants IA via un formulaire textuel. L'application supporte trois fournisseurs d'IA majeurs et permet de comparer leurs réponses en temps réel.
+PromptMulti_IA Docker est une application web qui permet aux utilisateurs d'interagir avec plusieurs assistants IA via un formulaire textuel. L'application supporte trois fournisseurs d'IA majeurs et permet de comparer leurs réponses en temps réel. **L'application est entièrement containerisée avec Docker pour un déploiement simplifié.**
 
 ## 🚀 Fonctionnalités
 
@@ -18,7 +18,8 @@ PromptingMulti_IA est une application web qui permet aux utilisateurs d'interagi
 - **Gestion des Erreurs** : Interface utilisateur avec gestion des erreurs robuste
 - **Indicateur de Chargement** : Feedback visuel pendant la génération
 - **Architecture Modulaire** : Structure organisée avec séparation des responsabilités
-- **Environnement Virtuel** : Gestion des dépendances avec uv
+- **Docker Ready** : Containerisation complète avec Docker et Docker Compose
+- **Gestion des Dépendances** : Utilisation de uv pour une installation rapide
 
 ## 🛠️ Technologies Utilisées
 
@@ -32,11 +33,12 @@ PromptingMulti_IA est une application web qui permet aux utilisateurs d'interagi
 - **Gestion des Dépendances** : uv
 - **Variables d'Environnement** : python-dotenv
 - **Architecture** : Pattern MVC (Model-View-Controller)
+- **Containerisation** : Docker, Docker Compose
 
 ## 📁 Structure du Projet
 
 ```
-promptingmulti_ia/
+promptmulti_ia_docker/
 ├── src/
 │   ├── application/     # Couche application (logique métier)
 │   ├── domaine/         # Couche domaine (entités et règles métier)
@@ -46,15 +48,112 @@ promptingmulti_ia/
 │       └── groq_client.py     # Client pour l'API Groq
 ├── templates/           # Templates HTML Flask
 │   └── index.html       # Page principale de l'application
+├── static/              # Fichiers statiques (CSS, JS, images)
 ├── test/               # Tests unitaires et d'intégration
-├── static/             # Fichiers statiques (CSS, JS, images)
 ├── app.py              # Point d'entrée de l'application Flask
+├── Dockerfile          # Configuration Docker
+├── docker-compose.yml  # Orchestration Docker Compose
+├── docker-build.sh     # Script de déploiement Docker
+├── .dockerignore       # Fichiers exclus du build Docker
 ├── env.example         # Exemple de variables d'environnement
 ├── pyproject.toml      # Configuration du projet et dépendances
+├── DOCKER.md           # Documentation Docker
 └── README.md           # Documentation du projet
 ```
 
-## 🚀 Installation et Configuration
+## 🐳 Déploiement avec Docker (Recommandé)
+
+### Prérequis
+
+- Docker installé sur votre machine
+- Variables d'environnement configurées (optionnel)
+
+### Déploiement Rapide
+
+#### Option 1: Script automatique
+
+```bash
+# Cloner le repository
+git clone https://github.com/MamadouBousso/promptmulti_ia_docker.git
+cd promptmulti_ia_docker
+
+# Rendre le script exécutable
+chmod +x docker-build.sh
+
+# Lancer le script
+./docker-build.sh
+```
+
+#### Option 2: Docker Compose (recommandé)
+
+```bash
+# Cloner le repository
+git clone https://github.com/MamadouBousso/promptmulti_ia_docker.git
+cd promptmulti_ia_docker
+
+# Construire et lancer avec docker-compose
+docker-compose up -d
+
+# Voir les logs
+docker-compose logs -f
+
+# Arrêter
+docker-compose down
+```
+
+#### Option 3: Docker manuel
+
+```bash
+# Cloner le repository
+git clone https://github.com/MamadouBousso/promptmulti_ia_docker.git
+cd promptmulti_ia_docker
+
+# Construire l'image
+docker build -t promptmulti_ia_docker .
+
+# Lancer le conteneur
+docker run -d \
+  --name promptmulti_ia_docker-container \
+  -p 8000:8000 \
+  -e OPENAI_API_KEY="votre_clé_openai" \
+  -e ANTHROPIC_API_KEY="votre_clé_claude" \
+  -e GROQ_API_KEY="votre_clé_groq" \
+  promptmulti_ia_docker
+```
+
+### Configuration des variables d'environnement
+
+#### Option 1: Fichier .env
+
+Créez un fichier `.env` à la racine du projet :
+
+```env
+OPENAI_API_KEY=votre_clé_openai_ici
+ANTHROPIC_API_KEY=votre_clé_claude_ici
+GROQ_API_KEY=votre_clé_groq_ici
+```
+
+Puis lancez avec :
+
+```bash
+docker-compose --env-file .env up -d
+```
+
+#### Option 2: Variables d'environnement système
+
+```bash
+export OPENAI_API_KEY="votre_clé_openai"
+export ANTHROPIC_API_KEY="votre_clé_claude"
+export GROQ_API_KEY="votre_clé_groq"
+```
+
+### Accès à l'application
+
+Une fois le conteneur lancé, l'application est accessible sur :
+- **URL locale** : http://localhost:8000 (ou le port configuré)
+- **URL réseau** : http://votre_ip:8000
+
+## 🚀 Installation Locale (Sans Docker)
 
 ### Prérequis
 
@@ -66,13 +165,16 @@ promptingmulti_ia/
 
 1. **Cloner le repository**
    ```bash
-   git clone https://github.com/MamadouBousso/promptingmulti_ia.git
-   cd promptingmulti_ia
+   git clone https://github.com/MamadouBousso/promptmulti_ia_docker.git
+   cd promptmulti_ia_docker
    ```
 
 2. **Initialiser l'environnement virtuel avec uv**
    ```bash
-   uv init
+   uv venv .venv
+   source .venv/bin/activate  # Sur macOS/Linux
+   # ou
+   .venv\Scripts\activate     # Sur Windows
    ```
 
 3. **Installer les dépendances**
@@ -201,7 +303,7 @@ L'interface se compose de :
   {
     "success": true,
     "text": "Réponse générée par OpenAI",
-    "prompt": "Question originale"
+    "model": "gpt-4o"
   }
   ```
 
@@ -220,9 +322,7 @@ L'interface se compose de :
   {
     "success": true,
     "text": "Réponse générée par Claude",
-    "prompt": "Question originale",
-    "model": "claude-3-5-sonnet-20241022",
-    "provider": "anthropic"
+    "model": "claude-3-5-sonnet-20241022"
   }
   ```
 
@@ -242,14 +342,12 @@ L'interface se compose de :
   {
     "success": true,
     "text": "Réponse générée par Groq",
-    "prompt": "Question originale",
-    "model": "llama3-8b-8192",
-    "provider": "groq"
+    "model": "llama3-8b-8192"
   }
   ```
 
 #### POST `/api/compare`
-- **Description** : API endpoint pour comparer les trois fournisseurs
+- **Description** : API endpoint pour comparer les trois modèles
 - **Méthodes** : POST
 - **Content-Type** : application/json
 - **Paramètres** :
@@ -262,240 +360,154 @@ L'interface se compose de :
   ```json
   {
     "success": true,
-    "prompt": "Question originale",
+    "prompt": "Votre question ici",
     "responses": {
       "openai": {
         "success": true,
-        "text": "Réponse OpenAI"
+        "text": "Réponse OpenAI",
+        "model": "gpt-4o"
       },
       "claude": {
         "success": true,
-        "text": "Réponse Claude"
+        "text": "Réponse Claude",
+        "model": "claude-3-5-sonnet-20241022"
       },
       "groq": {
         "success": true,
-        "text": "Réponse Groq"
+        "text": "Réponse Groq",
+        "model": "llama3-8b-8192"
       }
     }
   }
   ```
 
-### Exemples d'utilisation de l'API
+## 📋 Commandes Docker Utiles
 
-#### Test OpenAI
+### Gestion des conteneurs
+
 ```bash
-curl -X POST http://localhost:8000/api/chat \
-  -H "Content-Type: application/json" \
-  -d '{"prompt": "Explique-moi l'intelligence artificielle en 3 points"}'
+# Voir les conteneurs en cours
+docker ps
+
+# Voir les logs
+docker logs promptmulti_ia_docker-container
+
+# Arrêter le conteneur
+docker stop promptmulti_ia_docker-container
+
+# Redémarrer le conteneur
+docker restart promptmulti_ia_docker-container
+
+# Supprimer le conteneur
+docker rm promptmulti_ia_docker-container
+
+# Supprimer l'image
+docker rmi promptmulti_ia_docker
 ```
 
-#### Test Claude
+### Avec Docker Compose
+
 ```bash
-curl -X POST http://localhost:8000/api/claude \
-  -H "Content-Type: application/json" \
-  -d '{"prompt": "Quels sont les avantages du machine learning ?"}'
+# Voir les services
+docker-compose ps
+
+# Voir les logs
+docker-compose logs -f app
+
+# Redémarrer le service
+docker-compose restart app
+
+# Arrêter et supprimer
+docker-compose down
+
+# Reconstruire l'image
+docker-compose build --no-cache
 ```
 
-#### Test Groq
+## 🔍 Dépannage
+
+### Problèmes Docker
+
+#### Problème de port déjà utilisé
+Si le port 8000 est déjà utilisé, changez-le dans `docker-compose.yml` :
+```yaml
+ports:
+  - "8080:8000"  # Port externe:Port interne
+```
+
+#### Problème de permissions
 ```bash
-curl -X POST http://localhost:8000/api/groq \
-  -H "Content-Type: application/json" \
-  -d '{"prompt": "Comment fonctionne un réseau de neurones ?", "model": "llama3-8b-8192"}'
+# Donner les bonnes permissions au script
+chmod +x docker-build.sh
 ```
 
-#### Comparaison des trois
+#### Reconstruire l'image
 ```bash
-curl -X POST http://localhost:8000/api/compare \
-  -H "Content-Type: application/json" \
-  -d '{"prompt": "Explique la différence entre l'IA et le machine learning"}'
+# Supprimer l'ancienne image
+docker rmi promptmulti_ia_docker
+
+# Reconstruire
+docker build -t promptmulti_ia_docker .
 ```
 
-## 🔧 Configuration
-
-### Configuration Flask
-
-L'application Flask est configurée avec :
-- Mode debug activé pour le développement
-- Port par défaut : 8000 (configurable via FLASK_PORT)
-- Templates dans le dossier `templates/`
-- Gestion automatique des variables d'environnement
-
-### Configuration des Modèles
-
-#### OpenAI
-- **Modèle par défaut** : gpt-4o
-- **Max tokens** : 500
-- **Temperature** : 0.7
-- **Messages système** : Assistant vocal intelligent et utile
-
-#### Claude
-- **Modèle par défaut** : claude-3-5-sonnet-20241022
-- **Max tokens** : 500
-- **Temperature** : 0.7
-- **Messages système** : Assistant vocal intelligent et utile
-
-#### Groq
-- **Modèle par défaut** : llama3-8b-8192
-- **Max tokens** : 500
-- **Temperature** : 0.7
-- **Messages système** : Assistant vocal intelligent et utile
-
-## 🎨 Formatage Markdown
-
-L'application supporte le rendu complet du markdown avec :
-
-- **Titres** : `# ## ###` → Titres HTML formatés
-- **Listes** : `- * +` → Listes à puces visibles
-- **Listes numérotées** : `1. 2.` → Listes ordonnées
-- **Gras** : `**texte**` → Texte en gras
-- **Italique** : `*texte*` → Texte en italique
-- **Code inline** : `` `code` `` → Code avec fond gris
-- **Blocs de code** : ```...``` → Blocs de code formatés
-- **Liens** : `[texte](url)` → Liens cliquables
-- **Citations** : `> texte` → Citations avec bordure
-- **Séparateurs** : `---` → Lignes de séparation
-
-## 🧪 Tests
-
-Pour exécuter les tests (à implémenter) :
+#### Vérifier les logs
 ```bash
-# Tests unitaires
-python -m pytest test/
+# Logs en temps réel
+docker logs -f promptmulti_ia_docker-container
 
-# Tests d'intégration
-python -m pytest test/integration/
-
-# Tests des clients API
-python -m pytest test/test_clients/
+# Derniers logs
+docker logs --tail 50 promptmulti_ia_docker-container
 ```
 
-## 🔄 Développement
+### Problèmes Généraux
 
-### Ajout de Nouvelles Fonctionnalités
+#### Erreur "API non disponible"
+- Vérifiez que vos clés API sont correctement configurées
+- Assurez-vous que les variables d'environnement sont définies
+- Vérifiez la validité de vos clés API
 
-1. **Backend** : Ajoutez la logique dans `src/application/`
-2. **Infrastructure** : Ajoutez les clients API dans `src/infrastructure/`
-3. **Frontend** : Modifiez `templates/index.html`
-4. **Tests** : Créez les tests correspondants dans `test/`
-
-### Standards de Code
-
-- **Python** : PEP 8
-- **JavaScript** : ESLint (à configurer)
-- **HTML** : Validation W3C
-- **CSS** : Tailwind CSS classes
-
-### Architecture
-
-Le projet suit une architecture en couches :
-
-```
-┌─────────────────┐
-│   Templates     │ ← Interface utilisateur
-├─────────────────┤
-│   Application   │ ← Logique métier
-├─────────────────┤
-│   Infrastructure│ ← Clients API externes
-└─────────────────┘
-```
-
-## 🚀 Déploiement
-
-### Production
-
-1. **Configuration WSGI**
-   ```bash
-   pip install gunicorn
-   gunicorn -w 4 -b 0.0.0.0:8000 app:app
-   ```
-
-2. **Variables d'environnement**
-   ```bash
-   export FLASK_ENV=production
-   export FLASK_DEBUG=0
-   export OPENAI_API_KEY=your-production-key
-   export ANTHROPIC_API_KEY=your-production-key
-   export GROQ_API_KEY=your-production-key
-   ```
-
-### Docker (à implémenter)
-
-```dockerfile
-FROM python:3.12-slim
-WORKDIR /app
-COPY requirements.txt .
-RUN pip install -r requirements.txt
-COPY . .
-EXPOSE 8000
-CMD ["python", "app.py"]
-```
-
-## 🔒 Sécurité
-
-- **Validation des entrées** : Tous les prompts sont validés
-- **Gestion des erreurs** : Erreurs API gérées gracieusement
-- **Variables d'environnement** : Clés API sécurisées
-- **CORS** : Configuration appropriée pour la production
-
-## 📊 Monitoring
-
-- **Logs** : Logs détaillés des appels API
-- **Erreurs** : Gestion et affichage des erreurs
-- **Performance** : Temps de réponse des APIs
+#### Erreur de connexion
+- Vérifiez que l'application est bien lancée
+- Vérifiez le port utilisé (8000 par défaut)
+- Vérifiez les logs pour plus de détails
 
 ## 🤝 Contribution
 
-1. Fork le projet
-2. Créez une branche feature (`git checkout -b feature/AmazingFeature`)
-3. Committez vos changements (`git commit -m 'Add some AmazingFeature'`)
-4. Push vers la branche (`git push origin feature/AmazingFeature`)
-5. Ouvrez une Pull Request
+Les contributions sont les bienvenues ! Voici comment contribuer :
 
-### Guidelines de Contribution
-
-- Respectez les standards de code
-- Ajoutez des tests pour les nouvelles fonctionnalités
-- Mettez à jour la documentation
-- Testez sur plusieurs fournisseurs d'IA
+1. **Fork** le projet
+2. **Créez** une branche pour votre fonctionnalité (`git checkout -b feature/AmazingFeature`)
+3. **Commitez** vos changements (`git commit -m 'Add some AmazingFeature'`)
+4. **Poussez** vers la branche (`git push origin feature/AmazingFeature`)
+5. **Ouvrez** une Pull Request
 
 ## 📄 Licence
 
 Ce projet est sous licence MIT. Voir le fichier `LICENSE` pour plus de détails.
 
-## 👥 Auteurs
+## 👨‍💻 Auteur
 
-- **Mamadou Bousso** - Développement initial et maintenance
+**Mamadou Bousso**
+- GitHub: [@MamadouBousso](https://github.com/MamadouBousso)
+- Email: mamadou.bousso@example.com
 
 ## 🙏 Remerciements
 
-- **Flask** pour le framework web
-- **Tailwind CSS** pour les styles
-- **OpenAI** pour l'API GPT-4o
-- **Anthropic** pour l'API Claude
-- **Groq** pour l'API Llama
-- **marked.js** pour le rendu markdown
-- **uv** pour la gestion des dépendances
+- [OpenAI](https://openai.com/) pour l'API GPT-4o
+- [Anthropic](https://www.anthropic.com/) pour l'API Claude
+- [Groq](https://groq.com/) pour l'API Llama
+- [Flask](https://flask.palletsprojects.com/) pour le framework web
+- [Tailwind CSS](https://tailwindcss.com/) pour le styling
+- [uv](https://github.com/astral-sh/uv) pour la gestion des dépendances Python
 
 ## 📞 Support
 
-Pour toute question ou problème :
-- Ouvrez une issue sur GitHub
-- Contactez l'équipe de développement
-- Consultez la documentation des APIs
+Si vous rencontrez des problèmes ou avez des questions :
 
-## 🔮 Roadmap
-
-- [ ] Support de nouveaux modèles d'IA
-- [ ] Interface de chat en temps réel
-- [ ] Historique des conversations
-- [ ] Export des réponses
-- [ ] Interface d'administration
-- [ ] Métriques de performance
-- [ ] Support multilingue
-- [ ] Intégration de modèles locaux
+1. Consultez la section [Dépannage](#dépannage)
+2. Vérifiez les [Issues](https://github.com/MamadouBousso/promptmulti_ia_docker/issues) existantes
+3. Créez une nouvelle [Issue](https://github.com/MamadouBousso/promptmulti_ia_docker/issues/new) si nécessaire
 
 ---
 
-**Version** : 2.0.0  
-**Dernière mise à jour** : 28 Juin 2025  
-**Statut** : Production Ready avec support multi-IA
+**⭐ N'oubliez pas de donner une étoile au projet si vous l'aimez !**
